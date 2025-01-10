@@ -1,0 +1,22 @@
+# Ignorar arquivos de estado do Terraform na pasta MINIKUBE
+/**/terraform.tfstate
+/**/terraform.tfstate.backup
+
+# Ignorar arquivos de planos gerados pelo Terraform na pasta MINIKUBE
+/**/*.tfplan
+
+# Ignorar logs e outros arquivos temporários gerados
+/**/*.log
+
+# Ignorar diretório do Terraform onde módulos e plugins são armazenados
+/**/.terraform/
+/**/.terraform.lock.hcl
+
+# Ignorar arquivos de variáveis que podem conter informações sensíveis
+/**/*.auto.tfvars
+
+# Ignorar arquivos de configuração locais ou personalizados (se existirem)
+/**/*.override.tf
+/**/*.override.tf.json
+/**/*_override.tf
+/**/*_override.tf.json
