@@ -1,2 +1,3 @@
 #!/bin/bash
-echo "# NAMESPACE >> $1" > ./samples/password.log
+INPUT_1=$1
+echo "Por favor, insira um valor: ${INPUT_1}"

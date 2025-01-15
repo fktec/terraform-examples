@@ -2,28 +2,31 @@
 SYSTEM_PASSWORD=$1
 OPERATING_SYSTEM=$2
 SYSTEM_ARCHITECTURE=$3
-AUTO_APPROVE_CONDITION=$4
+MINIKUBE_INSTALL_FORCE_CONDITION="$4"
+
 
 main() {
-    install_dependencies
-
+    local MINIKUBE_COMMAND="minikube"
     local MINIKUBE_INSTALL_FILE_NAME="minikube-${OPERATING_SYSTEM}-${SYSTEM_ARCHITECTURE}"
-    local MINIKUBE_CLI_VERSION_CURRENT=$(minikube version)
+    local HAS_MINIKUBE_VERSION=$(command -v ${MINIKUBE_COMMAND})
 
-    if [[ ${MINIKUBE_CLI_VERSION_CURRENT} ]]
+    # Verifica se já existe uma versão do minikube instalada
+    if [[ ${HAS_MINIKUBE_VERSION} ]]
     then
-        read -p "# Já existe uma versão do Minikube instalado localmente, deseja continuar (s/n): " MINIKUBE_INSTALL_CONDITION
+        if ! [[ ${MINIKUBE_INSTALL_FORCE_CONDITION} ]]; then
+            read -p "# Já existe uma versão do Minikube instalado localmente, deseja continuar (s/n): " MINIKUBE_INSTALL_FORCE_CONDITION
+        fi
 
-        if [[ ${AUTO_APPROVE_CONDITION} ]]; then
-            echo "- Continuando instalação do Minikube..."
-        elif [[ ${MINIKUBE_INSTALL_CONDITION} == "n" ]]; then
-            echo "- Instalação do Minikube cancelada."
+        if [[ ${MINIKUBE_INSTALL_FORCE_CONDITION} == "n" ]]; then
+            echo "- Minikube já instalado, instalação cancelada."
             exit 0
-        elif ! [[ ${MINIKUBE_INSTALL_CONDITION} == "s" ]]; then
+        elif ! [[ ${MINIKUBE_INSTALL_FORCE_CONDITION} == "s" ]]; then
             echo "- Opção inválida. Escolha apenas 's' ou 'n'"
             exit 0
         fi
     fi
+
+    install_dependencies
 
     echo ""
     echo "- Baixando arquivo de instalação do Minikube..."
@@ -36,13 +39,13 @@ main() {
 
         echo ""
         echo "- Instalando Minikube..."
-        echo "${SYSTEM_PASSWORD}" | sudo -S install ${MINIKUBE_INSTALL_FILE_NAME} /usr/local/bin/minikube && rm ${MINIKUBE_INSTALL_FILE_NAME}
+        local MINIKUBE_INSTALL_RESPONSE=$(echo "${SYSTEM_PASSWORD}" | sudo -S install ${MINIKUBE_INSTALL_FILE_NAME} /usr/local/bin/minikube && rm ${MINIKUBE_INSTALL_FILE_NAME})
 
-        local MINIKUBE_CLI_VERSION_INSTALLED=$(minikube version)
+        local MINIKUBE_CLI_VERSION_INSTALLED=$(command -v ${MINIKUBE_COMMAND})
         if [[ ${MINIKUBE_CLI_VERSION_INSTALLED} ]]; then
             echo ""
             echo "# Instalacão do Minikube finalizada."
-            echo "${MINIKUBE_CLI_VERSION_INSTALLED}"
+            ${MINIKUBE_COMMAND} version
         else
             echo ""
             echo "# Não foi possível realizar a instalação do Minikube."
@@ -66,9 +69,13 @@ http_request() {
 
 install_dependencies() {
     echo "# Instalando algumas dependências..."
-    
-    local JQ_CLI_VERSION_CURRENT=$(jq --version)
-    if ! [[ ${JQ_CLI_VERSION_CURRENT} ]]; then
+
+    if ! command -v apt-get &> /dev/null; then
+        echo "# Instalando >> apt-get"
+        echo "${SYSTEM_PASSWORD}" | sudo -S apt install apt
+    fi
+
+    if ! command -v jq &> /dev/null; then
         echo "# Instalando >> jq"
         echo "${SYSTEM_PASSWORD}" | sudo -S apt-get install jq=1.6-2.1ubuntu3
     fi

@@ -1,3 +1,12 @@
+
+# variable "resources_enabled" {
+#   description = "Recursos que serão habilitados"
+#   default     = {
+#     "base_install" = "true"
+#     "features_install" = "true"
+#   }
+# }
+
 # # variable "global" {
 # #   description = "Variáveis Globais"
 # #   default     = {
@@ -24,6 +33,9 @@
 
 # variable "test_password" {
 #   type = string
+#   sensitive   = true
+#   # default = null
+# #    ephemeral = true
 # }
 
 # output "test_password_out" {

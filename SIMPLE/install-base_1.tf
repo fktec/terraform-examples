@@ -75,18 +75,25 @@
 # }
 
 
-variable "local_password" {
-  type = string
-  sensitive = true
+provider "null" {
+  alias = "base"
 }
 
-provider "null" {}
+locals {
+  passw_file = "generated_value1.txt"
+}
 
-resource "null_resource" "test-simple" {
+resource "null_resource" "base_install" {
+  triggers = {
+    always_run = timestamp()
+  }
 
   provisioner "local-exec" {
-    # command = "echo 'PASSW - ${var.local_password}'"
-    command = "bash samples/scripts/simple/simple-script.sh ${var.local_password}"
+    # command = "echo '# Instalando BASE.'"
+    command = <<EOT
+    echo "# Insira um valor:"
+    read OPTION_VALUE    
+    EOT
   }
 
 }
